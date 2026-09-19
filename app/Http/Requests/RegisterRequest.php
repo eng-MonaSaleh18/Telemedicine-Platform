@@ -42,6 +42,8 @@ class RegisterRequest extends FormRequest
             'doctorCredential.*.file_path' => 'required_if:role,doctor|file|mimes:pdf,jpg,png|max:2048',
             'doctorCredential.*.file_name' => 'required_if:role,doctor|max:255|string',
             'doctorCredential.*.description' => 'required_if:role,doctor|max:255|string',
+            'languages' => 'required_if:role,doctor|max:255|string',
+            'years_of_experience' => 'required_if:role,doctor|integer|min:0|max:50',
             'specialization_id' => 'required_if:role,doctor' ,
 
             'fcm_token' => 'nullable|string'

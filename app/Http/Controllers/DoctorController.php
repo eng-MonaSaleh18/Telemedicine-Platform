@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DoctorRequest;
 use App\Http\Resources\DoctorResource;
-use App\Http\Resources\PaginatedCollection;
+use App\Http\Resources\tedCollection;
 use App\Models\Doctor;
 use App\Services\DoctorService;
 use Illuminate\Http\Request;
@@ -29,11 +29,11 @@ class DoctorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function doctorEditInfo(DoctorRequest $request, $doctor_id)
+    public function doctorEditInfo(DoctorRequest $request)
     {
         
         try {
-            $doctor = $this->doctorService->doctorEditInfo($request->validated(), $doctor_id);
+            $doctor = $this->doctorService->doctorEditInfo($request->validated());
             return response()->json([
                 'doctor' => new DoctorResource($doctor->load('user'))
             ]);

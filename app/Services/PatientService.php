@@ -23,16 +23,6 @@ class PatientService
         return $patient;
     }
 
-
-    
-    public function getAllPatient()
-    {
-        $patient = Patient::with('user')->paginate(10);
-        return $patient;
-    }
-
-
-
     public function getAllSpecializations()
     {
         $specializations = Specialization::with('doctors')->get();
@@ -123,5 +113,15 @@ class PatientService
 
         return $favoriteDoctors ;
 
+    }
+
+
+    public function getAllDoctor()
+    {
+        $doctors = Doctor::with('user', 'specializations')
+            ->withAvg('ratings', 'rating')  // ✅ حساب المتوسط
+            ->withCount('ratings')           // ✅ عدد التقييمات
+            ->paginate(10);
+        return $doctors;
     }
 }

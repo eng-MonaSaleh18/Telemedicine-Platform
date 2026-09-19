@@ -13,7 +13,7 @@ class DoctorCredential extends Model
         'file_path',
         'file_name',
         'description',
-        'Specialization',
+        
     ];
 
 

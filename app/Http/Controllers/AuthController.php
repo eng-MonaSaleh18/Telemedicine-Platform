@@ -54,7 +54,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => $response['message'],
-            'user' => new AuthResource($user->load('doctor', 'doctor.doctorCredentials', 'doctor.specializations'))
+            'user' => new AuthResource($user->load('doctor', 'doctor.doctorCredentials', 'doctor.specialization'))
         ], 201);
     }
 

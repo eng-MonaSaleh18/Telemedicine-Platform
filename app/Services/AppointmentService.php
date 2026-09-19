@@ -75,7 +75,7 @@ class AppointmentService
 
         $appointment = Appointment::where('id', $data['appointment_id'])
             ->where('patient_id', $patient->id)->first();
-        if ($appointment->status == 'cancelled' ||  $appointment->status == 'complated') {
+        if ($appointment->status == 'cancelled' ||  $appointment->status == 'completed') {
             throw new Exception('This appointment is either cancelled or completed and cannot be modified.');
         }
 
@@ -157,5 +157,19 @@ class AppointmentService
         $appointment = Appointment::where('patient_id', $patient->id)->get();
 
         return $appointment;
+    }
+
+
+    public function cancelAppointmentByDoctor(array $data)
+    {
+        $appointment = Appointment::where('id', $data['appointment_id'])->first();
+        if ($appointment->status == 'cancelled' ||  $appointment->status == 'completed') {
+            throw new Exception('This appointment is either cancelled or completed and cannot be modified.');
+        }
+
+        return $appointment->update([
+            'status' => 'cancelled',
+            'patient_id' => null
+        ]);
     }
 }

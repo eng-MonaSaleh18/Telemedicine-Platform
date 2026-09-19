@@ -15,7 +15,10 @@ class Doctor extends Model
         'age',
         'address',
         'phone',
-        'is_active'
+        'is_active',
+        'specialization_id',
+        'languages',
+        'years_of_experience',
     ];
 
     public function user()
@@ -45,9 +48,9 @@ class Doctor extends Model
     }
 
 
-    public function specializations()
+    public function specialization()
     {
-        return $this->belongsToMany(Specialization::class);
+        return $this->belongsTo(Specialization::class);
     }
 
     public function favoriteByPatient()
@@ -61,4 +64,13 @@ class Doctor extends Model
     }
 
 
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function complaintsAgainstMe()
+    {
+        return $this->hasMany(Complaint::class);
+    }
 }

@@ -83,6 +83,21 @@ class AppointmentController extends Controller
         }
     }
 
+
+    public function cancelAppointmentByDoctor(BookAppoientmentRequest $request)
+    {
+        try {
+            $appointment = $this->appointmentService->cancelAppointmentByDoctor($request->validated());
+            return response()->json([
+                'message' => 'The appoientment has been cancelled successfully!'
+            ]);
+        } catch (Exception $e) {
+            return  response()->json([
+                'message' => $e->getMessage()
+            ], $e->getCode() ?: 400);
+        }
+    }
+
     public function completeAppointment(BookAppoientmentRequest $request)
     {
         try {

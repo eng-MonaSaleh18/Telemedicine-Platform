@@ -28,7 +28,14 @@ class DoctorRequest extends FormRequest
             'address' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'age' => 'required|integer',
-            
+            'specialization_id' => 'required|integer',
+            'languages' => 'required_if:role,doctor|max:255|string',
+            'years_of_experience' => 'required_if:role,doctor|integer|min:0|max:50',
+
+            'doctorCredential' => 'array',
+            'doctorCredential.*.file_path' => 'required_if:role,doctor|file|mimes:pdf,jpg,png|max:2048',
+            'doctorCredential.*.file_name' => 'required_if:role,doctor|max:255|string',
+            'doctorCredential.*.description' => 'required_if:role,doctor|max:255|string',
         ];
     }
 }

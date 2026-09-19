@@ -1,8 +1,6 @@
 <?php
-
 namespace App\Services;
 
-use App\Http\Requests\FcmTokenRequest;
 use App\Mail\VerificationCodeMail;
 use App\Models\Doctor;
 use App\Models\DoctorCredential;
@@ -20,20 +18,21 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthService
 {
-    public function __construct() {}
+    public function __construct()
+    {}
 
     public function fcmToken($fcmTokenValue, $userId = null)
     {
-        $userId = $userId ?? Auth::id();  // استخدم Auth إذا كان متاحًا، وإلا userId المُمرر
+        $userId = $userId ?? Auth::id(); // استخدم Auth إذا كان متاحًا، وإلا userId المُمرر
 
-        if (!$userId) {
+        if (! $userId) {
             // اختياري: رمِ خطأً أو تجاهل إذا لم يكن user_id متاحًا
             return null;
         }
 
         $fcm_token = FcmToken::updateOrCreate(
-            ['user_id' => $userId],  // البحث/التحديث بناءً على user_id فقط
-            ['fcm_token' => $fcmTokenValue]  // حدث هذا الحقل دائمًا
+            ['user_id' => $userId],        // البحث/التحديث بناءً على user_id فقط
+            ['fcm_token' => $fcmTokenValue]// حدث هذا الحقل دائمًا
         );
 
         return $fcm_token;
@@ -42,8 +41,8 @@ class AuthService
     public function userRegister(array $data, Request $request = null)
     {
         $user = User::create([
-            'email' => $data['email'],
-            'password' => Hash::make($data['password'])
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
         ]);
 
         $user->assignRole($data['role']);
@@ -51,11 +50,11 @@ class AuthService
         if ($data['role'] == 'patient') {
             $patient = Patient::create([
                 'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'address' => $data['address'],
-                'phone' => $data['phone'],
-                'age' => $data['age'],
-                'user_id' => $user->id
+                'last_name'  => $data['last_name'],
+                'address'    => $data['address'],
+                'phone'      => $data['phone'],
+                'age'        => $data['age'],
+                'user_id'    => $user->id,
             ]);
 
             // إرسال رمز التحقق
@@ -64,54 +63,55 @@ class AuthService
             // إنشاء توكن للمريض وتسجيل الدخول
             $token = $user->createToken('auth_token')->plainTextToken;
 
-
-            if (isset($data['fcm_token']) && !empty($data['fcm_token'])) {
-                $this->fcmToken($data['fcm_token'], $user->id);  // الآن سيحدث السجل الموجود
+            if (isset($data['fcm_token']) && ! empty($data['fcm_token'])) {
+                $this->fcmToken($data['fcm_token'], $user->id); // الآن سيحدث السجل الموجود
             }
-
 
             return [
                 'success' => true,
                 'message' => 'The patient has been successfully registered and logged in.',
-                'user' => $user,
-                'token' => $token
+                'user'    => $user,
+                'token'   => $token,
             ];
         } else {
             $doctor = Doctor::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'address' => $data['address'],
-                'phone' => $data['phone'],
-                'age' => $data['age'],
-                'user_id' => $user->id,
-                'is_active' => false,
+                'first_name'          => $data['first_name'],
+                'last_name'           => $data['last_name'],
+                'address'             => $data['address'],
+                'phone'               => $data['phone'],
+                'age'                 => $data['age'],
+                'user_id'             => $user->id,
+                'is_active'           => false,
+                'specialization_id'   => $data['specialization_id'],
+                'languages'           => $data['languages'],
+                'years_of_experience' => $data['years_of_experience'],
             ]);
 
             foreach ($data['doctorCredential'] as $credential) {
                 $filePath = $credential['file_path']->store('credentials', 'public');
                 DoctorCredential::create([
-                    'doctor_id' => $doctor->id,
-                    'file_path' => $filePath,
-                    'file_name' => $credential['file_name'],
+                    'doctor_id'   => $doctor->id,
+
+                    'file_path'   => $filePath,
+                    'file_name'   => $credential['file_name'],
                     'description' => $credential['description'],
+
                 ]);
             }
-            $doctor->specializations()->sync($data['specialization_id']);
 
             // إرسال رمز التحقق
             $this->sendVerificationCode($user);
 
-            if (isset($data['fcm_token']) && !empty($data['fcm_token'])) {
-                $this->fcmToken($data['fcm_token'], $user->id);  // الآن سيحدث السجل الموجود
+            if (isset($data['fcm_token']) && ! empty($data['fcm_token'])) {
+                $this->fcmToken($data['fcm_token'], $user->id); // الآن سيحدث السجل الموجود
             }
             return [
                 'success' => true,
                 'message' => "Your doctor has been successfully registered. Please wait for the admin to activate your account.",
-                'user' => $user
+                'user'    => $user,
             ];
         }
     }
-
 
     public function userLogin(array $data, Request $request = null)
     {
@@ -119,42 +119,40 @@ class AuthService
         $user = User::where('email', $data['email'])->first();
 
         // إذا لم يتم العثور على المستخدم
-        if (!$user) {
+        if (! $user) {
             return [
-                'error' => true,
-                'message' => 'The email is incorrect or not registered.'
+                'error'   => true,
+                'message' => 'The email is incorrect or not registered.',
             ];
         }
 
         // التحقق من كلمة المرور
-        if (!Hash::check($data['password'], $user->password)) {
+        if (! Hash::check($data['password'], $user->password)) {
             return [
-                'error' => true,
-                'message' => 'The password is incorrect.'
+                'error'   => true,
+                'message' => 'The password is incorrect.',
             ];
         }
 
         if ($user->hasRole('doctor')) {
             $doctor = Doctor::where('user_id', $user->id)->first();
-            if (!$doctor->is_active) {
+            if (! $doctor->is_active) {
                 return [
-                    'error' => true,
-                    'message' => 'Your account is not activated. Please wait for an admin to activate your account.'
+                    'error'   => true,
+                    'message' => 'Your account is not activated. Please wait for an admin to activate your account.',
                 ];
             }
         }
 
-        if (isset($data['fcm_token']) && !empty($data['fcm_token'])) {
-            $this->fcmToken($data['fcm_token'], $user->id);  // الآن سيحدث السجل الموجود
+        if (isset($data['fcm_token']) && ! empty($data['fcm_token'])) {
+            $this->fcmToken($data['fcm_token'], $user->id); // الآن سيحدث السجل الموجود
         }
         // إذا نجحت العملية، إرجاع المستخدم
         return [
             'error' => false,
-            'user' => $user
+            'user'  => $user,
         ];
     }
-
-
 
     public function handleGoogleCallback(array $data, Request $request = null)
     {
@@ -165,25 +163,23 @@ class AuthService
 
             $user = User::where('google_id', $googleUser->id)->first();
 
-            if (!$user) {
+            if (! $user) {
                 $user = User::updateOrCreate(
                     ['email' => $googleUser->email],
                     [
-                        'name' => $googleUser->name,
+                        'name'      => $googleUser->name,
                         'google_id' => $googleUser->id,
                     ]
                 );
             }
 
-
             $token = $user->createToken('auth_token')->plainTextToken;
 
-
-            if (isset($data['fcm_token']) && !empty($data['fcm_token'])) {
-                $this->fcmToken($data['fcm_token'], $user->id);  // الآن سيحدث السجل الموجود
+            if (isset($data['fcm_token']) && ! empty($data['fcm_token'])) {
+                $this->fcmToken($data['fcm_token'], $user->id); // الآن سيحدث السجل الموجود
             }
             return [
-                'user' => $user,
+                'user'  => $user,
                 'token' => $token,
             ];
         } catch (\Exception $e) {
@@ -191,9 +187,6 @@ class AuthService
             throw new \Exception('فشل تسجيل الدخول بجوجل: ' . $e->getMessage());
         }
     }
-
-
-
 
     public function generateVerificationCode()
     {
@@ -206,7 +199,7 @@ class AuthService
         } while (abs(ord($letter1) - ord($letter2)) <= 1);
 
         // توليد 4 أرقام عشوائية
-        $numbers = str_pad(rand(0, 9999), 4,    '0', STR_PAD_LEFT);
+        $numbers = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
 
         // دمج الحرفين والأرقام مع خلط عشوائي
         $code = $letter1 . $letter2 . $numbers;
@@ -214,7 +207,6 @@ class AuthService
 
         return $code;
     }
-
 
     public function sendVerificationCode(User $user)
     {
@@ -225,7 +217,7 @@ class AuthService
         VerificationCode::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'code' => $code,
+                'code'       => $code,
                 'expires_at' => Carbon::now()->addMinutes(5),
             ]
         );
@@ -234,7 +226,6 @@ class AuthService
         Mail::to($user->email)->send(new VerificationCodeMail($code, $user));
     }
 
-
     public function verifyUserCode(array $data)
     {
         $verification = VerificationCode::where('user_id', $data['user_id'])
@@ -242,7 +233,7 @@ class AuthService
             ->where('email_verified', false)
             ->first();
 
-        if (!$verification) {
+        if (! $verification) {
             return ['success' => false, 'message' => 'Invalid verification code or already used.'];
         }
 
@@ -256,12 +247,11 @@ class AuthService
         return ['success' => true, 'message' => 'Email verified successfully.'];
     }
 
-
     public function resendVerificationCode($email)
     {
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return ['success' => false, 'message' => 'User not found.'];
         }
 
@@ -270,8 +260,8 @@ class AuthService
         VerificationCode::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'code' => $newCode,
-                'expires_at' => Carbon::now()->addMinutes(5),
+                'code'           => $newCode,
+                'expires_at'     => Carbon::now()->addMinutes(5),
                 'email_verified' => false,
             ]
         );

@@ -15,6 +15,7 @@ class DoctorCredentialResource extends JsonResource
             'file_name' => $this['file_name'],
             'description' => $this['description'],
             
+            
         ];
     }
 }

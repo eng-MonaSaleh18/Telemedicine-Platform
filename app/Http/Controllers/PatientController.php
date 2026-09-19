@@ -23,11 +23,7 @@ class PatientController extends Controller
     }
 
 
-    public function getAllPatient()
-    {
-        $patients = $this->patientService->getAllPatient();
-        return response()->json(new PaginatedCollection(PatientResource::collection($patients)));
-    }
+    
 
 
 
@@ -89,8 +85,9 @@ class PatientController extends Controller
 
 
 
-    public function destroy(Patient $patient)
+    public function getAllDoctor()
     {
-        //
+        $doctors = $this->patientService->getAllDoctor();
+        return response()->json(new PaginatedCollection(DoctorResource::collection($doctors)));
     }
 }

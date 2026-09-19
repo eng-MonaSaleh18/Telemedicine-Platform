@@ -62,4 +62,14 @@ class Patient extends Model
     {
         return $this->hasMany(Chat::class);
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
 }

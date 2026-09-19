@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('address');
             $table->string('phone');
             $table->boolean('is_active')->default(false);
+            $table->foreignId('specialization_id')->constrained('specializations')->onDelete('cascade');
+            $table->integer('years_of_experience');
+            $table->string('languages');
             $table->timestamps();
         });
     }
