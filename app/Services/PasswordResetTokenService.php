@@ -98,6 +98,40 @@ class PasswordResetTokenService
     }
 
 
+
+
+    public function setNewPassword(array $data)
+    {
+        try {
+            $resetRecord = PasswordResetToken::where('email', $data['email'])->first();
+
+            if (!$resetRecord) {
+                return [
+                    'success' => false,
+                    'message' => 'Invalid verification code',
+                ];
+            }
+
+
+            $user = User::where('email',$data['email'])->first();
+            $user->update([
+                'password' => Hash::make($data['new_password']),
+            ]);
+
+            $resetRecord->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Password has been updated successfully',
+                'user' => $user,
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ];
+        }
+    }
 }
 
 

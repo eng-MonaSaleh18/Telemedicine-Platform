@@ -42,7 +42,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/chat/{chatId}/sendMessage', [MessageController::class, 'sendMessage']);
 
     Route::post('/auth/forgot-password', [PasswordResetTokenController::class, 'sendResetToken']);
-    Route::post('/auth/forgot-password', [PasswordResetTokenController::class, 'sendResetToken']);
+    Route::post('/auth/verify-Reset-code', [PasswordResetTokenController::class, 'verifyResetToken']);
+    Route::post('/auth/set-new-password', [PasswordResetTokenController::class, 'setNewPassword']);
 
     Route::group(['middleware' => 'role:doctor'], function () {
         Route::post('doctor/edit', [DoctorController::class, 'doctorEditInfo']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Requests\SetNewPasswordRequest;
 use App\Http\Requests\VerifyResetCodeRequest;
 use App\Models\PasswordResetToken;
 use App\Services\PasswordResetTokenService;
@@ -32,9 +33,28 @@ class PasswordResetTokenController extends Controller
 
 
 
-    public function verifyResetCode(VerifyResetCodeRequest $request)
+    public function verifyResetToken(VerifyResetCodeRequest $request)
     {
         $result = $this->passwordResetTokenService->verifyResetToken($request->validated());
+
+        if (!$result['success']) {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message']
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $result['message']
+        ], 200);
+    }
+
+
+
+    public function setNewPassword(SetNewPasswordRequest $request)
+    {
+        $result = $this->passwordResetTokenService->setNewPassword($request->validated());
 
         if (!$result['success']) {
             return response()->json([
